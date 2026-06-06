@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avatar — Bloxia</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23e2231a'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main class="page">
+    <h1 class="page-title">Avatar Editor</h1>
+    <p class="page-sub">Build your Bloxian. Changes save automatically and appear in-game.</p>
+
+    <div class="avatar-layout">
+      <div class="avatar-stage">
+        <div id="bloxguy"></div>
+      </div>
+
+      <div>
+        <div class="tabs" id="tabs"></div>
+        <div class="panel" id="editorPanel"></div>
+        <div class="panel" style="margin-top:16px">
+          <h3>Equipped Items</h3>
+          <div class="swatches" id="equipped"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/chat.js"></script>
+  <script src="assets/js/avatar.js"></script>
+</body>
+</html>

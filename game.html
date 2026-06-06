@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play — Bloxia</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23e2231a'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main class="page">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+      <div id="gameIcon" class="thumb" style="width:64px;height:64px;border-radius:12px;flex:0 0 64px"></div>
+      <div>
+        <h1 class="page-title" id="gameTitle" style="margin:0">Loading…</h1>
+        <p class="page-sub" id="gameMeta" style="margin:0"></p>
+      </div>
+      <button class="btn green" id="likeBtn" style="margin-left:auto">👍 Like</button>
+    </div>
+
+    <div class="game-wrap">
+      <canvas id="game-canvas"></canvas>
+      <div class="hud">
+        <div class="top">
+          <div class="chip">⏱ <span id="timer">0.0</span>s</div>
+          <div class="chip">🏁 Stage <span id="stage">1</span>/<span id="stageTotal">6</span></div>
+          <div class="chip">💰 <span id="coins">0</span></div>
+        </div>
+      </div>
+      <div class="overlay-msg" id="startOverlay">
+        <div class="box">
+          <h2 id="overlayTitle">Mega Obby Tower</h2>
+          <p>Reach the golden platform at the top! Don't fall off. Collect coins for bonus Bux.</p>
+          <button class="btn green" id="startBtn">▶ Start Climbing</button>
+        </div>
+      </div>
+      <div class="overlay-msg hidden" id="winOverlay">
+        <div class="box">
+          <h2>🏆 You Win!</h2>
+          <p id="winText">You reached the top!</p>
+          <button class="btn green" id="playAgainBtn">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-help">
+      <span><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> Move</span>
+      <span><span class="key">Space</span> Jump</span>
+      <span><span class="key">Mouse</span> Look around</span>
+      <span><span class="key">R</span> Respawn</span>
+    </div>
+
+    <div class="section-head"><h2>More like this</h2><a href="discover.html">See all</a></div>
+    <div class="row" id="moreRow"></div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/chat.js"></script>
+  <script src="assets/js/game.js"></script>
+</body>
+</html>

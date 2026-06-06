@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marketplace — Bloxia</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23e2231a'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main class="page">
+    <h1 class="page-title">Marketplace</h1>
+    <p class="page-sub">Customize your avatar with hats, gear, pets and more. Earn Bux by playing!</p>
+
+    <div class="filters" id="filters"></div>
+    <div class="grid" id="shopGrid"></div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/chat.js"></script>
+  <script>
+    const { ITEMS, itemCard } = window.Bloxia;
+    const cats = ["All", ...Array.from(new Set(ITEMS.map(i => i.cat)))];
+    let active = "All";
+    const filtersEl = document.getElementById("filters");
+    cats.forEach(cat => {
+      const b = document.createElement("button");
+      b.className = "chip-btn" + (cat === "All" ? " active" : "");
+      b.textContent = cat;
+      b.onclick = () => { active = cat; [...filtersEl.children].forEach(c => c.classList.toggle("active", c === b)); render(); };
+      filtersEl.appendChild(b);
+    });
+    function render() {
+      const list = ITEMS.filter(i => active === "All" || i.cat === active);
+      const grid = document.getElementById("shopGrid");
+      grid.innerHTML = "";
+      grid.append(...list.map(itemCard));
+    }
+    render();
+  </script>
+</body>
+</html>

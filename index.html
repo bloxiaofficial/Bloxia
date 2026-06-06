@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bloxia — Powering Imagination</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23e2231a'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main class="page">
+    <section class="hero">
+      <h1>Welcome to Bloxia</h1>
+      <p>Millions of free experiences built by a global community. Jump in, play, build, and imagine anything.</p>
+      <div class="cta">
+        <a class="btn green" href="game.html?id=obby-tower">▶ Play Now</a>
+        <a class="btn ghost" href="discover.html">Discover Games</a>
+      </div>
+    </section>
+
+    <div class="section-head"><h2>⭐ Featured</h2><a href="discover.html">See all</a></div>
+    <div class="row" id="featuredRow"></div>
+
+    <div class="section-head"><h2>🔥 Popular Right Now</h2><a href="discover.html">See all</a></div>
+    <div class="row" id="popularRow"></div>
+
+    <div class="section-head"><h2>🎮 Recommended For You</h2><a href="discover.html">See all</a></div>
+    <div class="grid" id="recoGrid"></div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/chat.js"></script>
+  <script>
+    const { GAMES, gameCard } = window.Bloxia;
+    const featured = GAMES.filter(g => g.featured);
+    const popular = [...GAMES].sort((a, b) => b.plays - a.plays);
+    const reco = [...GAMES].sort((a, b) => b.rating - a.rating).slice(0, 8);
+    featured.concat(popular).forEach(() => {});
+    document.getElementById("featuredRow").append(...featured.map(gameCard));
+    document.getElementById("popularRow").append(...popular.map(gameCard));
+    document.getElementById("recoGrid").append(...reco.map(gameCard));
+  </script>
+</body>
+</html>

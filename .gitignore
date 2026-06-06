@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local SQLite database (contains user data)
+*.db
+backend/*.db
+
+# OS
+.DS_Store
