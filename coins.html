@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buy Bux — Bloxia</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23e2231a'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main class="page">
+    <h1>Buy Bux</h1>
+    <p class="muted">Top up your balance to grab gear, hats, and pets in the Marketplace.</p>
+    <div class="demo-banner">🧪 <b>Demo checkout</b> — this is a simulated purchase. No real payment is taken; Bux are credited instantly.</div>
+    <div class="grid coin-grid" id="packGrid"></div>
+  </main>
+
+  <!-- mock checkout modal -->
+  <div class="modal-backdrop" id="checkout" style="display:none">
+    <div class="modal">
+      <h2>Checkout</h2>
+      <p class="muted" id="checkoutSummary"></p>
+      <label class="field"><span>Card number</span><input value="4242 4242 4242 4242" /></label>
+      <div class="field-row">
+        <label class="field"><span>Expiry</span><input value="12 / 30" /></label>
+        <label class="field"><span>CVC</span><input value="123" /></label>
+      </div>
+      <p class="muted small">Test card pre-filled. No real charge occurs.</p>
+      <div class="modal-actions">
+        <button class="btn ghost" id="cancelBtn">Cancel</button>
+        <button class="btn green" id="payBtn">Pay (Demo)</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer" id="footer"></footer>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/chat.js"></script>
+  <script>
+    (function () {
+      const { toast, applyServerUser, isAuthed, renderHeader, API, el } = window.Bloxia;
+      const $ = (id) => document.getElementById(id);
+      const PRICE = { starter: 4.99, pro: 9.99, mega: 24.99, ultra: 59.99 };
+      const META = {
+        starter: { coins: 5000, label: "Starter Pack", emoji: "💰", tag: "" },
+        pro: { coins: 15000, label: "Pro Pack", emoji: "💎", tag: "Popular" },
+        mega: { coins: 50000, label: "Mega Pack", emoji: "🪙", tag: "Best value" },
+        ultra: { coins: 150000, label: "Ultra Pack", emoji: "👑", tag: "Whale" },
+      };
+      let selected = null;
+
+      function render() {
+        const grid = $("packGrid");
+        grid.innerHTML = "";
+        Object.keys(META).forEach(key => {
+          const m = META[key];
+          const card = el(`
+            <div class="card coin-pack">
+              ${m.tag ? `<span class="badge gold">${m.tag}</span>` : ``}
+              <div class="thumb"><span class="emoji">${m.emoji}</span></div>
+              <div class="card-body">
+                <p class="card-title">${m.label}</p>
+                <p class="coin-amt"><span class="bux">B</span>${m.coins.toLocaleString()}</p>
+                <button class="btn green block" data-pack="${key}">$${PRICE[key].toFixed(2)}</button>
+              </div>
+            </div>`);
+          grid.appendChild(card);
+        });
+      }
+      render();
+
+      document.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-pack]");
+        if (!b) return;
+        if (!isAuthed()) { toast("Please log in to buy Bux."); setTimeout(() => location.href = "login.html", 700); return; }
+        selected = b.getAttribute("data-pack");
+        const m = META[selected];
+        $("checkoutSummary").textContent = `${m.label} — ${m.coins.toLocaleString()} Bux for $${PRICE[selected].toFixed(2)}`;
+        $("checkout").style.display = "flex";
+      });
+
+      $("cancelBtn").addEventListener("click", () => { $("checkout").style.display = "none"; });
+      $("payBtn").addEventListener("click", async () => {
+        if (!selected) return;
+        $("payBtn").disabled = true;
+        try {
+          const res = await API.purchase(selected);
+          applyServerUser(res.user);
+          renderHeader();
+          $("checkout").style.display = "none";
+          toast(`Success! +${res.credited.toLocaleString()} Bux`);
+        } catch (e) {
+          toast(e.message || "Checkout failed");
+        } finally {
+          $("payBtn").disabled = false;
+          selected = null;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

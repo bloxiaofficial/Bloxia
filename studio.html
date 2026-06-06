@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studio — Bloxia</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23e2231a'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main class="page">
+    <h1>Bloxia Studio</h1>
+    <p class="muted">Build your own obby. Click tiles to lay a climbing path — each new tile rises one step. Tile #1 is the start, the last tile is the golden finish. Test it, then publish for everyone to play.</p>
+
+    <div class="studio-layout">
+      <div class="studio-stage">
+        <div class="grid-board" id="board"></div>
+        <div class="studio-legend">
+          <span><i class="sw start"></i> Start</span>
+          <span><i class="sw step"></i> Step (+coin)</span>
+          <span><i class="sw finish"></i> Finish</span>
+        </div>
+      </div>
+
+      <aside class="studio-panel">
+        <label class="field"><span>Game title</span><input id="title" maxlength="40" placeholder="My Epic Obby" /></label>
+        <div class="field-row">
+          <label class="field"><span>Icon</span><input id="emoji" maxlength="4" value="🏗️" /></label>
+          <div class="stat-box"><span>Steps</span><b id="stepCount">0</b></div>
+          <div class="stat-box"><span>Height</span><b id="heightVal">0m</b></div>
+        </div>
+        <label class="field"><span>Description</span><input id="desc" maxlength="200" placeholder="Can you reach the top?" /></label>
+
+        <div class="studio-buttons">
+          <button class="btn ghost" id="undoBtn">↩ Undo</button>
+          <button class="btn ghost" id="clearBtn">🗑 Clear</button>
+        </div>
+        <button class="btn dark block" id="testBtn">▶ Test Play</button>
+        <button class="btn green block" id="publishBtn">🚀 Publish Game</button>
+        <p class="form-error" id="studioError"></p>
+        <p class="muted small" id="loginHint" style="display:none">You must <a href="login.html">log in</a> to publish. You can still Test Play.</p>
+      </aside>
+    </div>
+
+    <div class="section-head" style="margin-top:34px"><h2>🌍 Community Creations</h2></div>
+    <div class="grid" id="communityGrid"><p class="muted" id="communityEmpty">Loading community games…</p></div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/chat.js"></script>
+  <script>
+    (function () {
+      const { toast, isAuthed, API, el, fmt } = window.Bloxia;
+      const $ = (id) => document.getElementById(id);
+      const N = 11, SPACING = 5, STEP_H = 2.0, C = (N - 1) / 2;
+      let path = []; // array of {col, row}
+
+      // build board
+      const board = $("board");
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          const cell = el(`<button class="cell" data-c="${c}" data-r="${r}"></button>`);
+          board.appendChild(cell);
+        }
+      }
+      board.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
+
+      function key(c, r) { return c + "," + r; }
+      function indexOfCell(c, r) { return path.findIndex(p => p.col === c && p.row === r); }
+
+      function redraw() {
+        document.querySelectorAll(".cell").forEach(cell => {
+          cell.className = "cell";
+          cell.textContent = "";
+        });
+        path.forEach((p, i) => {
+          const cell = board.querySelector(`[data-c="${p.col}"][data-r="${p.row}"]`);
+          if (!cell) return;
+          cell.classList.add("filled");
+          if (i === 0) cell.classList.add("start");
+          else if (i === path.length - 1) cell.classList.add("finish");
+          cell.textContent = i + 1;
+        });
+        $("stepCount").textContent = path.length;
+        $("heightVal").textContent = (path.length ? ((path.length - 1) * STEP_H).toFixed(1) : 0) + "m";
+      }
+
+      board.addEventListener("click", (e) => {
+        const cell = e.target.closest(".cell");
+        if (!cell) return;
+        const c = +cell.dataset.c, r = +cell.dataset.r;
+        const existing = indexOfCell(c, r);
+        if (existing !== -1) { path.splice(existing, 1); } // toggle off
+        else { path.push({ col: c, row: r }); }
+        redraw();
+      });
+
+      $("undoBtn").addEventListener("click", () => { path.pop(); redraw(); });
+      $("clearBtn").addEventListener("click", () => { path = []; redraw(); });
+
+      function buildLevel() {
+        const platforms = [], coins = [];
+        path.forEach((p, i) => {
+          const x = (p.col - C) * SPACING;
+          const z = (p.row - C) * SPACING;
+          const y = i * STEP_H;
+          const isStart = i === 0, isFinish = i === path.length - 1;
+          platforms.push({ x, y, z, w: 4, d: 4, start: isStart, finish: isFinish });
+          if (!isStart && !isFinish) coins.push({ x, y: y + 1.3, z });
+        });
+        return {
+          platforms, coins,
+          start: platforms[0] ? { x: platforms[0].x, y: platforms[0].y, z: platforms[0].z } : { x: 0, y: 0, z: 0 },
+          finish: platforms.length ? { x: platforms[platforms.length - 1].x, y: platforms[platforms.length - 1].y, z: platforms[platforms.length - 1].z } : null,
+        };
+      }
+
+      function validate() {
+        $("studioError").textContent = "";
+        if (path.length < 2) { $("studioError").textContent = "Add at least 2 tiles (a start and a finish)."; return false; }
+        return true;
+      }
+
+      $("testBtn").addEventListener("click", () => {
+        if (!validate()) return;
+        const draft = { title: $("title").value.trim() || "Untitled Obby", emoji: $("emoji").value || "🏗️", level: buildLevel() };
+        localStorage.setItem("bloxia.draft", JSON.stringify(draft));
+        location.href = "game.html?draft=1";
+      });
+
+      $("publishBtn").addEventListener("click", async () => {
+        if (!validate()) return;
+        if (!isAuthed()) { toast("Log in to publish."); setTimeout(() => location.href = "login.html", 700); return; }
+        const title = $("title").value.trim();
+        if (!title) { $("studioError").textContent = "Give your game a title."; return; }
+        $("publishBtn").disabled = true;
+        try {
+          const { game } = await API.createGame({
+            title, emoji: $("emoji").value || "🎮",
+            description: $("desc").value.trim(), level: buildLevel(),
+          });
+          toast("Published! 🎉");
+          setTimeout(() => location.href = "game.html?ugc=" + game.id, 600);
+        } catch (e) {
+          $("studioError").textContent = e.message || "Publish failed.";
+          $("publishBtn").disabled = false;
+        }
+      });
+
+      if (!isAuthed()) $("loginHint").style.display = "block";
+      redraw();
+
+      // community games
+      async function loadCommunity() {
+        if (!API || !API.isConfigured()) { $("communityEmpty").textContent = "Backend not configured — community games unavailable."; return; }
+        try {
+          const { games } = await API.listGames("popular");
+          const grid = $("communityGrid");
+          grid.innerHTML = "";
+          if (!games.length) { grid.innerHTML = `<p class="muted">No community games yet — be the first to publish!</p>`; return; }
+          games.forEach(g => {
+            grid.appendChild(el(`
+              <a class="card" href="game.html?ugc=${g.id}">
+                <div class="thumb" style="background:linear-gradient(150deg,#6a5cff,#00a2ff)">
+                  <span class="emoji">${g.emoji || "🎮"}</span>
+                </div>
+                <div class="card-body">
+                  <p class="card-title">${g.title}</p>
+                  <div class="card-meta">
+                    <span class="pill-green">@${g.owner}</span>
+                    <span>▶ ${fmt(g.plays)}</span>
+                  </div>
+                </div>
+              </a>`));
+          });
+        } catch (e) {
+          $("communityEmpty").textContent = "Couldn't load community games.";
+        }
+      }
+      loadCommunity();
+    })();
+  </script>
+</body>
+</html>

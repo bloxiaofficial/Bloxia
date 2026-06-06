@@ -1,6 +1,6 @@
 /* Bloxia — avatar editor */
 (function () {
-  const { State, toast } = window.Bloxia;
+  const { State, toast, isAuthed, API } = window.Bloxia;
   const A = State.data.avatar;
 
   const SKINS = ["#f6c177", "#e8b98b", "#c68642", "#8d5524", "#ffd9b3", "#a3e635", "#7dd3fc", "#f9a8d4"];
@@ -101,7 +101,13 @@
     const save = document.createElement("button");
     save.className = "btn green block"; save.style.marginTop = "18px";
     save.textContent = "Save Avatar";
-    save.onclick = () => { State.save(); toast("Avatar saved!"); };
+    save.onclick = async () => {
+      State.save();
+      if (isAuthed()) {
+        try { await API.updateAvatar(State.data.avatar); toast("Avatar saved to account!"); }
+        catch (e) { toast("Saved locally; server sync failed."); }
+      } else { toast("Avatar saved! Log in to sync across devices."); }
+    };
     p.appendChild(save);
   }
 

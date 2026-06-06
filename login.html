@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log In — Bloxia</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23e2231a'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <main class="page narrow">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-mode="login">Log In</button>
+        <button class="auth-tab" data-mode="register">Sign Up</button>
+      </div>
+      <h1 id="authTitle">Welcome back</h1>
+      <p class="muted" id="authSub">Log in to save your coins, creations, and chat.</p>
+
+      <label class="field">
+        <span>Username</span>
+        <input id="username" autocomplete="username" placeholder="3–20 letters, numbers, _" />
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input id="password" type="password" autocomplete="current-password" placeholder="Your password" />
+      </label>
+      <p class="form-error" id="formError"></p>
+      <button class="btn green block" id="submitBtn">Log In</button>
+      <p class="muted small" id="offlineNote" style="display:none;margin-top:14px">
+        Backend not configured — accounts are unavailable in this build.
+      </p>
+    </div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    (function () {
+      const { toast, refreshUser, applyServerUser, API } = window.Bloxia;
+      let mode = "login";
+      const $ = (id) => document.getElementById(id);
+      const err = (m) => { $("formError").textContent = m || ""; };
+
+      if (!API || !API.isConfigured()) {
+        $("submitBtn").disabled = true;
+        $("offlineNote").style.display = "block";
+      }
+      if (API && API.getToken()) { location.href = "index.html"; }
+
+      document.querySelectorAll(".auth-tab").forEach(t => t.addEventListener("click", () => {
+        document.querySelectorAll(".auth-tab").forEach(x => x.classList.remove("active"));
+        t.classList.add("active");
+        mode = t.getAttribute("data-mode");
+        $("authTitle").textContent = mode === "login" ? "Welcome back" : "Create your account";
+        $("authSub").textContent = mode === "login"
+          ? "Log in to save your coins, creations, and chat."
+          : "New players start with 12,500 Bux.";
+        $("submitBtn").textContent = mode === "login" ? "Log In" : "Sign Up";
+        $("password").setAttribute("autocomplete", mode === "login" ? "current-password" : "new-password");
+        err("");
+      }));
+
+      async function submit() {
+        err("");
+        const u = $("username").value.trim();
+        const p = $("password").value;
+        if (u.length < 3) return err("Username must be at least 3 characters.");
+        if (p.length < 4) return err("Password must be at least 4 characters.");
+        $("submitBtn").disabled = true;
+        try {
+          const res = mode === "login" ? await API.login(u, p) : await API.register(u, p);
+          API.setToken(res.token);
+          applyServerUser(res.user);
+          toast(mode === "login" ? "Logged in!" : "Account created!");
+          setTimeout(() => location.href = "index.html", 400);
+        } catch (e) {
+          err(e.message || "Something went wrong.");
+          $("submitBtn").disabled = false;
+        }
+      }
+      $("submitBtn").addEventListener("click", submit);
+      $("password").addEventListener("keydown", e => { if (e.key === "Enter") submit(); });
+    })();
+  </script>
+</body>
+</html>

@@ -17,6 +17,41 @@
     set(partial) { Object.assign(this.data, partial); this.save(); },
   };
 
+  // ---------- Auth (server-backed when available) ----------
+  const API = window.BloxiaAPI || null;
+  function isAuthed() { return !!(API && API.isConfigured() && API.getToken()); }
+
+  function applyServerUser(user) {
+    if (!user) return;
+    State.data.username = user.username;
+    State.data.bux = user.coins;
+    if (user.avatar && typeof user.avatar === "object") {
+      State.data.avatar = Object.assign({}, DEFAULTS.avatar, user.avatar);
+    }
+    State.save();
+  }
+
+  async function refreshUser() {
+    if (!isAuthed()) return null;
+    try {
+      const { user } = await API.me();
+      applyServerUser(user);
+      renderHeader();
+      return user;
+    } catch (e) {
+      // token invalid/expired -> drop it, fall back to guest
+      API.setToken(null);
+      renderHeader();
+      return null;
+    }
+  }
+
+  function logout() {
+    if (API) API.setToken(null);
+    localStorage.removeItem("bloxia.state");
+    location.href = "index.html";
+  }
+
   function load() {
     try {
       const raw = JSON.parse(localStorage.getItem("bloxia.state"));
@@ -112,13 +147,20 @@
     return c;
   }
 
-  function buy(id) {
+  async function buy(id) {
     const item = ITEMS.find(i => i.id === id);
     if (!item) return;
     if (State.data.owned.includes(id)) { toast("You already own this item."); return; }
     if (State.data.bux < item.price) { toast("Not enough Bux!"); return; }
-    State.data.bux -= item.price;
-    State.data.owned.push(id);
+    if (isAuthed() && item.price > 0) {
+      try {
+        const { user } = await API.spend(item.price, "item:" + id);
+        applyServerUser(user);
+      } catch (e) { toast(e.message || "Purchase failed"); return; }
+    } else {
+      State.data.bux -= item.price;
+    }
+    if (!State.data.owned.includes(id)) State.data.owned.push(id);
     State.save();
     renderHeader();
     toast(`Purchased ${item.name}!`);
@@ -138,12 +180,13 @@
         <nav class="nav-links">
           <a href="index.html" data-p="index.html">Home</a>
           <a href="discover.html" data-p="discover.html">Discover</a>
+          <a href="studio.html" data-p="studio.html">Studio</a>
           <a href="avatar.html" data-p="avatar.html">Avatar</a>
           <a href="marketplace.html" data-p="marketplace.html">Marketplace</a>
         </nav>
         <div class="search"><span>🔍</span><input id="searchInput" placeholder="Search games..." /></div>
-        <div class="currency"><span class="bux">B</span><span id="buxAmt">${State.data.bux.toLocaleString()}</span></div>
-        <div class="avatar-chip" title="${State.data.username}">${State.data.username[0]}</div>
+        <a class="currency" href="coins.html" title="Buy more Bux"><span class="bux">B</span><span id="buxAmt">${State.data.bux.toLocaleString()}</span><span class="buy-plus">+</span></a>
+        ${authArea()}
       </div>`;
     const cur = slot.querySelector(`[data-p="${path}"]`);
     if (cur) cur.classList.add("active");
@@ -151,6 +194,17 @@
     if (si) si.addEventListener("keydown", e => {
       if (e.key === "Enter") location.href = "discover.html?q=" + encodeURIComponent(si.value);
     });
+    const lo = document.getElementById("logoutBtn");
+    if (lo) lo.addEventListener("click", e => { e.preventDefault(); logout(); });
+  }
+
+  function authArea() {
+    if (isAuthed()) {
+      const u = State.data.username || "Player";
+      return `<div class="avatar-chip" title="${u}">${u[0].toUpperCase()}</div>
+        <a href="#" id="logoutBtn" class="auth-link">Log out</a>`;
+    }
+    return `<a href="login.html" class="btn green auth-btn">Log In</a>`;
   }
 
   function renderFooter() {
@@ -171,7 +225,7 @@
   });
 
   // expose
-  window.Bloxia = { State, GAMES, ITEMS, RARE_COLOR, fmt, el, toast, gameCard, itemCard, buy, renderHeader, renderFooter };
+  window.Bloxia = { State, GAMES, ITEMS, RARE_COLOR, fmt, el, toast, gameCard, itemCard, buy, renderHeader, renderFooter, isAuthed, refreshUser, applyServerUser, logout, API };
 
-  document.addEventListener("DOMContentLoaded", () => { renderHeader(); renderFooter(); });
+  document.addEventListener("DOMContentLoaded", () => { renderHeader(); renderFooter(); refreshUser(); });
 })();

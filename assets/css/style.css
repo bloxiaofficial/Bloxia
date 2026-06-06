@@ -195,3 +195,89 @@ button { font-family: inherit; cursor: pointer; }
   .nav-links { display: none; }
   .hero h1 { font-size: 28px; }
 }
+
+/* ===== V2: Auth, Studio, Coins, Chat ===== */
+
+/* Header extras */
+.auth-link { font-size: 13px; color: var(--muted); margin-left: 6px; white-space: nowrap; }
+.auth-link:hover { color: var(--brand); }
+.auth-btn { padding: 8px 16px !important; font-size: 13px !important; white-space: nowrap; margin-left: 8px; }
+.buy-plus { font-size: 15px; font-weight: 800; margin-left: 4px; color: var(--green); }
+.currency { display: flex; align-items: center; gap: 4px; }
+
+/* Narrow centered page */
+.page.narrow { max-width: 420px; margin: 0 auto; }
+
+/* Auth card */
+.auth-card { background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 24px; margin-top: 38px; }
+.auth-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--line); margin-bottom: 18px; }
+.auth-tab { flex: 1; text-align: center; padding: 10px; background: none; border: none; font-size: 15px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.auth-tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+
+/* Form fields */
+.field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.field span { font-size: 13px; font-weight: 600; color: var(--muted); }
+.field input { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 15px; outline: none; transition: border .2s; }
+.field input:focus { border-color: var(--brand); }
+.field-row { display: flex; gap: 10px; }
+.field-row .field { flex: 1; }
+.form-error { color: var(--brand); font-size: 13px; min-height: 18px; margin: 4px 0; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+
+/* Studio */
+.studio-layout { display: grid; grid-template-columns: 1fr 260px; gap: 24px; margin-top: 16px; }
+.studio-stage { background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+.grid-board { display: grid; gap: 3px; max-width: 400px; margin: auto; }
+.cell { width: 100%; aspect-ratio: 1; background: #eaecee; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 700; color: #fff; transition: .15s; }
+.cell:hover { background: #cfd3d7; }
+.cell.filled { background: var(--accent); }
+.cell.start { background: var(--green); }
+.cell.finish { background: var(--gold); color: var(--ink); }
+.studio-legend { display: flex; gap: 14px; justify-content: center; margin-top: 10px; font-size: 12px; color: var(--muted); align-items: center; }
+.sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: middle; margin-right: 3px; }
+.sw.start { background: var(--green); }
+.sw.step { background: var(--accent); }
+.sw.finish { background: var(--gold); }
+.studio-panel { background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.stat-box { text-align: center; font-size: 12px; color: var(--muted); }
+.stat-box b { display: block; font-size: 20px; color: var(--ink); }
+.studio-buttons { display: flex; gap: 8px; }
+.studio-buttons .btn { flex: 1; }
+
+/* Coins / Buy Bux */
+.coin-grid { margin-top: 20px; }
+.coin-pack { text-align: center; }
+.coin-amt { font-size: 22px; font-weight: 800; margin: 4px 0 10px; color: var(--gold); }
+.demo-banner { background: #fff8e1; border: 1px solid #ffd54f; border-radius: var(--radius); padding: 12px 16px; margin: 16px 0; font-size: 14px; color: #6d4c00; }
+.badge.gold { background: var(--gold); color: var(--ink); }
+
+/* Modal / checkout */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 300; display: flex; align-items: center; justify-content: center; }
+.modal { background: var(--panel); border-radius: var(--radius); box-shadow: 0 8px 32px rgba(0,0,0,.2); padding: 28px 24px; width: 380px; max-width: 90vw; }
+.modal h2 { margin: 0 0 12px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+.modal-actions .btn { flex: 1; }
+
+/* Chat widget */
+.chat-launcher { position: fixed; bottom: 20px; right: 20px; z-index: 400; width: 52px; height: 52px; border-radius: 50%; background: var(--brand); color: #fff; font-size: 24px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,.25); cursor: pointer; transition: .2s; }
+.chat-launcher:hover, .chat-launcher.active { background: #c11d16; transform: scale(1.05); }
+.chat-panel { position: fixed; bottom: 80px; right: 20px; z-index: 400; width: 340px; max-width: 90vw; height: 420px; max-height: 60vh; background: var(--panel); border-radius: var(--radius); box-shadow: 0 8px 28px rgba(0,0,0,.18); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(12px); transition: .2s; }
+.chat-panel.show { opacity: 1; pointer-events: all; transform: translateY(0); }
+.chat-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; font-weight: 700; border-bottom: 1px solid var(--line); font-size: 14px; }
+.chat-close { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--muted); }
+.chat-log { flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.chat-msg { background: #f0f2f4; border-radius: 8px; padding: 6px 10px; max-width: 85%; }
+.chat-msg.me { background: #dbeafe; align-self: flex-end; }
+.chat-user { font-weight: 700; margin-right: 6px; }
+.chat-time { font-size: 10px; color: var(--muted); margin-left: 6px; }
+.chat-sys { text-align: center; font-size: 11px; color: var(--muted); padding: 2px; }
+.chat-input-row { display: flex; gap: 6px; padding: 10px 14px; border-top: 1px solid var(--line); }
+.chat-input-row input { flex: 1; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; outline: none; }
+.chat-input-row .btn { padding: 8px 14px; font-size: 13px; }
+.chat-note { text-align: center; font-size: 11px; color: var(--muted); padding: 4px; margin: 0; }
+
+@media (max-width: 640px) {
+  .studio-layout { grid-template-columns: 1fr; }
+  .chat-panel { width: 94vw; right: 3vw; bottom: 76px; }
+}
